@@ -13,8 +13,11 @@ class AuthService:
         if not verify_password(password,user.hashed_password):
             raise ValueError("Incorrect email or password.")
         
-        token_data = {"sub": str(user.id)}
-        token = create_acess_token(data=token)
+        token_data = {
+            "sub": str(user.id),
+            "role": user.role
+            }
+        token = create_acess_token(data=token_data)
 
         return {
             "access_token": token,
