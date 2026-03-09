@@ -16,6 +16,19 @@ class UserService:
 
         return self.user_repository.create_user(new_user)
     
+    def get_by_id(self, user_id):
+        user = self.user_repository.get_user_by_id(user_id=user_id)
+        if not user:
+            raise ValueError("User not found.")
+        return user
+
+
+    def get_all(self):
+        users = self.user_repository.get_all()
+        if not users:
+            raise ValueError("Users not found.")
+        return users
+    
     def update(self, user_id: UUID, data: UserUpdateDTO) -> User:
         user = self.user_repository.get_user_by_id(user_id)
         if not user:

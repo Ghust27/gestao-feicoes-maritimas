@@ -2,17 +2,18 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from src.services.user import UserService
 from src.schemas.user import UserDTO, UserUpdateDTO
 from uuid import UUID
+from src.api.dependencies import require_admin, require_operator_or_admin, get_current_user_token
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 @router.get("/", status_code=status.HTTP_200_OK)
-def get_users(service: UserService = Depends(get_user_service)):
+def get_users(service: UserService = Depends(get_user_service), current_user: dict = Depends(require_admin)):
     users = service.get_all()
     return users
     
 
 @router.get("/{user_id}", status_code=status.HTTP_200_OK)
-def get_user_by_id(user_id: UUID, service: UserService = Depends(get_user_service)):
+def get_user_by_id(user_id: UUID, service: UserService = Depends(get_user_service), current_user: dict = Depends(require_admin)):
     try:
         user = service.get_by_id(user_id)
         return user
@@ -35,7 +36,7 @@ def create_user(data: UserDTO, service: UserService = Depends(get_user_service))
         )
 
 @router.patch("/{user_id}", status_code=status.HTTP_200_OK)
-def update_user(user_id: UUID, data: UserUpdateDTO, service: UserService = Depends(get_user_service)):
+def update_user(user_id: UUID, data: UserUpdateDTO, service: UserService = Depends(get_user_service), current_user: dict = Depends(require_operator_or_admin)):
     try:
         user = service.update(data=data)
         return user
@@ -46,7 +47,7 @@ def update_user(user_id: UUID, data: UserUpdateDTO, service: UserService = Depen
             )
     
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_user(user_id: UUID, service: UserService = Depends(get_user_service)):
+def delete_user(user_id: UUID, service: UserService = Depends(get_user_service), current_user: dict = Depends(require_admin)):
     try:
         user = service.delete(user_id=user_id)
         return 

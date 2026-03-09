@@ -19,6 +19,11 @@ class IUserRepository(ABC):
     def get_user_by_email(self, email: str) -> User | None:
         """Get the user informations from the database using the email."""
         pass
+
+    @abstractmethod
+    def get_all(self, ) -> list | None:
+        """Get users informations from the database."""
+        pass
     
     @abstractmethod
     def validate_user_status(self, user_id) -> bool:

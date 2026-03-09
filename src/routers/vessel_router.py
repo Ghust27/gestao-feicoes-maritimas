@@ -2,20 +2,21 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from src.services.vessel import VesselService
 from src.schemas.vessel import VesselDTO, VesselUpdateDTO
 from uuid import UUID
+from src.api.dependencies import get_current_user_token, require_admin, require_operator_or_admin
 
 
 router = APIRouter(prefix="/vessels", tags=["vessels"])
 
 @router.get("/", status_code=status.HTTP_200_OK)
-def get_vessels(service: VesselService = Depends(get_vessel_service)):
+def get_vessels(service: VesselService = Depends(get_vessel_service), current_user: dict = Depends(get_current_user_token)):
     vessels = service.get_all()
     return vessels
     
 
-@router.get("/{vessel_id}", status_code=status.HTTP_200_OK)
-def get_vessel_by_id(vessel_id: UUID, service: VesselService = Depends(get_vessel_service)):
+@router.get("/{mmsi}", status_code=status.HTTP_200_OK)
+def get_vessel_by_id(mmsi: str, service: VesselService = Depends(get_vessel_service), current_user: dict = Depends(get_current_user_token)):
     try:
-        vessel = service.get_by_id(vessel_id)
+        vessel = service.get_by_id(mmsi)
         return vessel
     except ValueError as err:
         raise HTTPException(
@@ -24,7 +25,7 @@ def get_vessel_by_id(vessel_id: UUID, service: VesselService = Depends(get_vesse
         )
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_vessel(data: VesselDTO, service: VesselService = Depends(get_vessel_service)):
+def create_vessel(data: VesselDTO, service: VesselService = Depends(get_vessel_service), current_user: dict = Depends(require_operator_or_admin)):
     try:
         new_vessel = service.create(data=data)
         return new_vessel
@@ -34,8 +35,8 @@ def create_vessel(data: VesselDTO, service: VesselService = Depends(get_vessel_s
             detail=str(err)
         )
 
-@router.patch("/[{mmsi}]", status_code=status.HTTP_200_OK)
-def update_vessel(mmsi: str, data: VesselUpdateDTO, service: VesselService = Depends(get_vessel_service)):
+@router.patch("/{mmsi}", status_code=status.HTTP_200_OK)
+def update_vessel(mmsi: str, data: VesselUpdateDTO, service: VesselService = Depends(get_vessel_service), current_user: dict = Depends(require_operator_or_admin)):
     try:
         vessel = service.update(data=data)
         return vessel
@@ -46,9 +47,9 @@ def update_vessel(mmsi: str, data: VesselUpdateDTO, service: VesselService = Dep
             )
     
 @router.delete("/{mmsi}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_vessel(vessel_id: UUID, service: VesselService = Depends(get_vessel_service)):
+def delete_vessel(mmsi: str, service: VesselService = Depends(get_vessel_service), current_user: dict = Depends(require_admin)):
     try:
-        vessel = service.delete(vessel_id=vessel_id)
+        vessel = service.delete(mmsi=mmsi)
         return 
     except ValueError as err:
         raise HTTPException(

@@ -11,7 +11,7 @@ class IOilFeatureRepository(ABC):
         pass
 
     @abstractmethod
-    def get_all_oil_features(self, status: str = None, min_confidence_level: int = None):
+    def get_all_oil_features(self, status: str = None, min_confidence_level: int = None) -> list | None:
         "Get all oil features, may or may not contain filters."
         pass
 

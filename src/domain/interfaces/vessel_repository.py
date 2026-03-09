@@ -11,7 +11,12 @@ class IVesselRepository(ABC):
         pass
 
     @abstractmethod
-    def get_vessel(self, vessel_mmsi: str) -> Vessel | None :
+    def get_all(self) -> list | None :
+        """Get all Vessels informations from the database."""
+        pass
+
+    @abstractmethod
+    def get_by_id(self, mmsi: str) -> Vessel | None :
         """Get the Vessel informations from the database using the id."""
         pass
         
