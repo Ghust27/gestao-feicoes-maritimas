@@ -390,7 +390,3 @@ gestao-feicoes-maritimas/
 ```
 
 ---
-
-## License
-
-See repository license file if present.
