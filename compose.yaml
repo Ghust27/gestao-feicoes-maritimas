@@ -2,13 +2,30 @@ services:
   db:
     image: postgres:15-alpine
     ports:
-      - "5432:5432" 
+      - "5432:5432"
     environment:
-      - POSTGRES_USER=${DB_USER}       
-      - POSTGRES_PASSWORD=${DB_PASSWORD} 
-      - POSTGRES_DB=${DB_NAME}         
+      - POSTGRES_USER=${DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+      - POSTGRES_DB=${DB_NAME:-gestao_feicoes}
     volumes:
-      - postgres_data:/var/lib/postgresql/data 
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_URL=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@db:5432/${DB_NAME:-gestao_feicoes}
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+      - ALGORITHM=${ALGORITHM:-HS256}
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   postgres_data:
