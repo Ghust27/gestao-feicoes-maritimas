@@ -13,10 +13,11 @@ class AuthService:
         if not verify_password(password,user.hashed_password):
             raise ValueError("Incorrect email or password.")
         
+        role_val = user.role.value if hasattr(user.role, "value") else str(user.role)
         token_data = {
             "sub": str(user.id),
-            "role": user.role
-            }
+            "role": role_val,
+        }
         token = create_acess_token(data=token_data)
 
         return {
