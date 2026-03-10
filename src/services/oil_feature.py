@@ -26,14 +26,18 @@ class OilFeatureService:
         oil_feature = self.oil_feature_repository.get_oil_feature(oil_feature_id)
         if not oil_feature:
             raise ValueError("Oil Feature not found.")
-        if oil_feature.status in ["confirmed", "discarded"]:
-            raise ValueError("It is not possible to change data for a confirmed or discarded feature.")
+        status_val = oil_feature.status.value if hasattr(oil_feature.status, "value") else str(oil_feature.status)
+        if status_val in ["CONFIRMED", "DISCARDED"]:
+            raise ValueError("Cannot update a confirmed or discarded feature.")
         
-        return self.oil_feature_repository.update_oil_feature(id=oil_feature_id ,data=data)
+        return self.oil_feature_repository.update_oil_feature(
+            oil_feature_id=oil_feature_id,
+            data=data,
+        )
     
     def delete(self, oil_feature_id: str) -> bool:
         oil_feature = self.oil_feature_repository.get_oil_feature(oil_feature_id)
         if not oil_feature:
-            raise ValueError("oil_feature not found.")
+            raise ValueError("Oil feature not found.")
         
-        return self.oil_feature_repository.delete_vessel(oil_feature_id)
+        return self.oil_feature_repository.delete_oil_feature(oil_feature_id)

@@ -1,19 +1,26 @@
-from src.domain.interfaces.user_repository import IUserRepository
-from src.schemas.user import UserDTO, UserUpdateDTO
-from src.domain.entities.user import User
 from uuid import UUID
+
+from src.core.security import get_password_hash
+from src.domain.entities.user import User
+from src.domain.interfaces.user_repository import IUserRepository
+from src.schemas.user import UserCreateDTO, UserDTO, UserUpdateDTO
 
 
 class UserService:
     def __init__(self, user_repository: IUserRepository):
         self.user_repository = user_repository
-    
-    def create(self, data: UserDTO) -> User:
+
+    def create(self, data: UserCreateDTO) -> User:
         user = self.user_repository.get_user_by_email(data.email)
         if user:
             raise ValueError("Email already registered.")
-        new_user = User(data=data)
-
+        user_dto = UserDTO(
+            name=data.name,
+            email=data.email,
+            hashed_password=get_password_hash(data.password),
+            role=data.role,
+        )
+        new_user = User(data=user_dto)
         return self.user_repository.create_user(new_user)
     
     def get_by_id(self, user_id):
@@ -24,17 +31,16 @@ class UserService:
 
 
     def get_all(self):
-        users = self.user_repository.get_all()
-        if not users:
-            raise ValueError("Users not found.")
-        return users
+        return self.user_repository.get_all()
     
     def update(self, user_id: UUID, data: UserUpdateDTO) -> User:
         user = self.user_repository.get_user_by_id(user_id)
         if not user:
             raise ValueError("User not found.")
-        
-        return self.user_repository.update_user(id=user_id ,data=data)
+        update_data = data.model_dump(exclude_unset=True)
+        if "password" in update_data:
+            update_data["hashed_password"] = get_password_hash(update_data.pop("password"))
+        return self.user_repository.update_user(user_id=user_id, data=update_data)
     
     def delete(self, user_id: UUID) -> bool:
         user = self.user_repository.get_user_by_id(user_id)

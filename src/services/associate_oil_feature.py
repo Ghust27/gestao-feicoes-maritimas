@@ -11,7 +11,7 @@ class AssociateOilFeatureService:
         oil_feature = self.oil_feature_repository.get_oil_feature(oil_feature_id)
         if not oil_feature:
             raise ValueError("Oil feature not found.")
-        vessel = self.vessel_repository.get_vessel(mmsi)
+        vessel = self.vessel_repository.get_by_id(mmsi)
         if not vessel:
             raise ValueError("Vessel not found.")
         if not vessel.active:
@@ -22,8 +22,10 @@ class AssociateOilFeatureService:
         oil_feature = self.oil_feature_repository.get_oil_feature(oil_feature_id)
         if not oil_feature:
             raise ValueError("Oil feature not found.")
-        vessel = self.vessel_repository.get_vessel(mmsi)
+        vessel = self.vessel_repository.get_by_id(mmsi)
         if not vessel:
             raise ValueError("Vessel not found.")
 
-        return self.oil_feature_repository.disassociate_oil_feature_with_vessel(oil_feature_id=oil_feature_id,vessel_mmsi=mmsi)
+        return self.oil_feature_repository.disassociate_oil_feature_with_vessel(
+            oil_feature_id=oil_feature_id, vessel_mmsi=mmsi
+        )

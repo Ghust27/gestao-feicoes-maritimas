@@ -1,5 +1,5 @@
-""" Embarcação: mmsi (PK, 9 dígitos numéricos), nome, imo (único opcional), tipo, ativo (bool),
-created_at. Não permitir exclusão se houver vínculo com feições. """
+"""Vessel: mmsi (PK, 9 numeric digits), name, imo (unique optional), type, active (bool),
+created_at. Cannot delete if linked to features."""
 
 from datetime import datetime,timezone
 from src.schemas.vessel import VesselDTO

@@ -22,18 +22,15 @@ class VesselService:
             raise ValueError("Vessel not found.")
         return vessel
     
-    def get_all(self, mmsi: str) -> Vessel:
-        vessels = self.vessel_repository.get_all()
-        if not vessels:
-            raise ValueError("Vessels not found.")
-        return vessels
+    def get_all(self) -> list:
+        return self.vessel_repository.get_all()
     
     def update(self, mmsi: str, data: VesselUpdateDTO) -> Vessel:
         vessel = self.vessel_repository.get_by_id(mmsi)
         if not vessel:
             raise ValueError("Vessel not found.")
         
-        return self.vessel_repository.update_vessel(id=mmsi ,data=data)
+        return self.vessel_repository.update_vessel(vessel_mmsi=mmsi, data=data)
     
     def delete(self, mmsi: str) -> bool:
         vessel = self.vessel_repository.get_by_id(mmsi)
