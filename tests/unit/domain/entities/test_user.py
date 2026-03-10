@@ -1,13 +1,15 @@
+import hashlib
+from datetime import datetime, timezone
+from uuid import uuid4
+
 import pytest
 from src.domain.entities.user import User
-from src.schemas.user import UserDTO
-import hashlib
-from uuid import uuid4
-from datetime import datetime,timezone
+from src.schemas.user import Role, UserDTO
 
 raw_test_password = "1234567890"
 hash_object = hashlib.sha256(raw_test_password.encode("utf-8"))
 hash_hex = hash_object.hexdigest()
+
 
 @pytest.fixture
 def base_user():
@@ -15,8 +17,7 @@ def base_user():
         name="Andre",
         email="teste@teste.com.br",
         hashed_password=hash_hex,
-        role="operator",
-        active=True
+        role=Role.OPERATOR,
     )
 
 def test_generation_of_uuid_and_creation_date(base_user):

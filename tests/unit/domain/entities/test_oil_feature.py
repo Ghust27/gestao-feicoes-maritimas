@@ -1,8 +1,10 @@
+from datetime import datetime, timezone
+from uuid import UUID, uuid4
+
 import pytest
 from src.domain.entities.oil_feature import OilFeature
-from src.schemas.oil_feature import OilFeatureDTO
-from uuid import UUID,uuid4
-from datetime import datetime, timezone
+from src.schemas.oil_feature import OilFeatureDTO, Status
+
 
 @pytest.fixture
 def base_oil_feature():
@@ -11,7 +13,7 @@ def base_oil_feature():
         longitude=12,
         estimated_area=25,
         confidence_level=45,
-        status="detected"
+        status=Status.DETECTED,
     )
 
 def test_generation_of_uuid_and_detection_date(base_oil_feature):
@@ -30,9 +32,9 @@ def test_oil_feature_must_respect_provided_id_and_date(base_oil_feature):
     expected_oil_feature_detection_date = datetime(2026,3,5,tzinfo=timezone.utc)
     oil_feature = OilFeature(
         base_oil_feature,
-        id=id,
+        id=expected_id,
         detection_date=expected_oil_feature_detection_date
         )
     
-    assert oil_feature.id == id
+    assert oil_feature.id == expected_id
     assert oil_feature.detection_date == expected_oil_feature_detection_date
