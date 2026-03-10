@@ -261,6 +261,12 @@ Starts PostgreSQL and the API in containers:
 docker compose up -d
 ```
 
+Apply migrations after containers are up:
+
+```bash
+docker exec gestao-feicoes-maritimas-api-1 alembic upgrade head
+```
+
 Optional `.env` for Compose:
 
 ```env
@@ -276,7 +282,7 @@ SECRET_KEY=change-me-in-production
 ### 6. Quick test
 
 1. Create a user: `POST /users/` with `name`, `email`, `password`, `role` (e.g. `admin`).
-2. Login: `POST /auth/login` with `email` and `password`.
+2. Login: `POST /auth/login` with JSON body (`email`, `password`) or OAuth2 form body (`username`, `password`) from Swagger Authorize.
 3. Use the returned `access_token` in `Authorization: Bearer <token>` for protected endpoints.
 
 ---
@@ -321,7 +327,8 @@ Requires PostgreSQL and `DB_URL` pointing to it (e.g. after `docker compose up -
 
 ```bash
 # Set DB_URL if not in .env
-set DB_URL=postgresql://postgres:postgres@localhost:5432/gestao_feicoes   # Windows
+set DB_URL=postgresql://postgres:postgres@localhost:5432/gestao_feicoes   # Windows CMD
+$env:DB_URL="postgresql://postgres:postgres@localhost:5432/gestao_feicoes" # Windows PowerShell
 export DB_URL=postgresql://postgres:postgres@localhost:5432/gestao_feicoes # Linux/macOS
 
 pytest tests/integration/ -v
