@@ -1,19 +1,34 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from src.services.oil_feature import OilFeatureService
 from src.services.associate_oil_feature import AssociateOilFeatureService
-from src.schemas.oil_feature import OilFeatureDTO, OilFeatureUpdateDTO, VesselDTO
+from src.schemas.oil_feature import OilFeatureDTO, OilFeatureUpdateDTO
 from src.services.confirm_oil_feature import ConfirmOilFeatureService
 from src.services.discard_oil_feature import DiscardOilFeatureService
 from typing import Optional
 from uuid import UUID
-from src.api.dependencies import get_current_user_token, require_admin, require_operator_or_admin
+from src.api.dependencies import (
+    get_current_user_token,
+    require_admin,
+    require_operator_or_admin,
+    get_oil_feature_service,
+    get_associate_oil_feature_service,
+    get_confirm_oil_feature_service,
+    get_discard_oil_feature_service,
+)
 
 
 router = APIRouter(prefix="/oil-features", tags=["oil features"])
 
 @router.get("/", status_code=status.HTTP_200_OK)
-def get_oil_features(status: Optional[str] = None, min_confidence_level: Optional[int] = None, service: OilFeatureService = Depends(get_oil_feature_service), current_user: dict = Depends(get_current_user_token)):
-    oil_features = service.get_all(status= status, min_confidence_level= min_confidence_level)
+def get_oil_features(
+    status_filter: Optional[str] = Query(None, alias="status"),
+    min_confidence_level: Optional[int] = Query(None, alias="min_confidence_level"),
+    service: OilFeatureService = Depends(get_oil_feature_service),
+    current_user: dict = Depends(get_current_user_token),
+):
+    oil_features = service.get_all(
+        status=status_filter, min_confidence_level=min_confidence_level
+    )
     return oil_features
     
 
@@ -72,11 +87,15 @@ def associate_vessel_to_feature(oil_feature_id: UUID, mmsi: str, service: Associ
             detail=str(err)
         )
 
-@router.delete("/{oil_feature_id}/vessels/{mmsi}", status_code=status.HTTP_200_OK)
-def disassociate_vessel_to_feature(oil_feature_id: UUID, mmsi: str, service: AssociateOilFeatureService = Depends(get_associate_oil_feature_service), current_user: dict = Depends(require_admin)):
+@router.delete("/{oil_feature_id}/vessels/{mmsi}", status_code=status.HTTP_204_NO_CONTENT)
+def disassociate_vessel_from_feature(
+    oil_feature_id: UUID,
+    mmsi: str,
+    service: AssociateOilFeatureService = Depends(get_associate_oil_feature_service),
+    current_user: dict = Depends(require_admin),
+):
     try:
-        result = service.disassociate(mmsi= mmsi, oil_feature_id=oil_feature_id)
-        return result
+        service.disassociate(mmsi=mmsi, oil_feature_id=oil_feature_id)
     except ValueError as err:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -84,9 +103,14 @@ def disassociate_vessel_to_feature(oil_feature_id: UUID, mmsi: str, service: Ass
         )
     
 @router.patch("/{oil_feature_id}/confirm", status_code=status.HTTP_200_OK)
-def confirm_oil_feature(data:VesselDTO, oil_feature_id: UUID, service: ConfirmOilFeatureService = Depends(get_confirm_oil_feature_service), current_user: dict = Depends(require_operator_or_admin)):
+def confirm_oil_feature(
+    oil_feature_id: UUID,
+    service: ConfirmOilFeatureService = Depends(get_confirm_oil_feature_service),
+    current_user: dict = Depends(require_operator_or_admin),
+):
     try:
-        result = service.execute(mmsi=data.mmsi,oil_feature_id=oil_feature_id)
+        user_id = UUID(current_user["id"])
+        result = service.execute(user_id=user_id, oil_feature_id=oil_feature_id)
         return result
     except ValueError as err:
         raise HTTPException(

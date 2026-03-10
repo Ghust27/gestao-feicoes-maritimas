@@ -2,7 +2,12 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from src.services.vessel import VesselService
 from src.schemas.vessel import VesselDTO, VesselUpdateDTO
 from uuid import UUID
-from src.api.dependencies import get_current_user_token, require_admin, require_operator_or_admin
+from src.api.dependencies import (
+    get_current_user_token,
+    require_admin,
+    require_operator_or_admin,
+    get_vessel_service,
+)
 
 
 router = APIRouter(prefix="/vessels", tags=["vessels"])
@@ -35,10 +40,10 @@ def create_vessel(data: VesselDTO, service: VesselService = Depends(get_vessel_s
             detail=str(err)
         )
 
-@router.patch("/{mmsi}", status_code=status.HTTP_200_OK)
+@router.put("/{mmsi}", status_code=status.HTTP_200_OK)
 def update_vessel(mmsi: str, data: VesselUpdateDTO, service: VesselService = Depends(get_vessel_service), current_user: dict = Depends(require_operator_or_admin)):
     try:
-        vessel = service.update(data=data)
+        vessel = service.update(mmsi=mmsi, data=data)
         return vessel
     except ValueError as err:
         raise HTTPException(
