@@ -17,7 +17,6 @@ def _to_role(value) -> Role:
 
 def _to_db_role(value) -> str:
     role = _to_role(value)
-    # Keep uppercase in persistence to remain compatible with legacy DB constraints.
     return role.value.upper()
 
 

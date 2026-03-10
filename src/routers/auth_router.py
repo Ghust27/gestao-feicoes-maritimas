@@ -22,7 +22,6 @@ async def login(request: Request, service: AuthService = Depends(get_auth_servic
             password = data.password
         else:
             form = await request.form()
-            # OAuth2 Password flow sends username/password in form-encoded payload.
             username = form.get("username")
             password = form.get("password")
             if username is None or password is None:

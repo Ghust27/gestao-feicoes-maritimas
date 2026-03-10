@@ -1,5 +1,3 @@
-# User: id (UUID), name, email (unique), password (hash), role (ADMIN, OPERATOR), active (bool),
-# created_at. Full CRUD. Cannot delete if user has confirmed features.
 from uuid import UUID, uuid4
 from datetime import datetime, timezone
 from src.schemas.user import UserDTO
