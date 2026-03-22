@@ -19,7 +19,7 @@ A microservice for managing users, vessels, and satellite-detected oil features 
 
 ## Overview
 
-The platform monitors offshore vessels and possible oil features detected by satellite. It allows operators to:
+The platform monitors offshore vessels and possible oil features detected by users. It allows operators to:
 
 - Manage **users** (admins and operators)
 - Manage **vessels** (ships with MMSI, type, etc.)
